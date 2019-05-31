@@ -5,6 +5,7 @@ ml_inputs.csv
 ml_outputs.csv
 saved_models/
 *.tflite
+training/
 
 # Created by https://www.gitignore.io/api/python,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=python,visualstudiocode

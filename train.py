@@ -10,6 +10,7 @@ import model
 import torchvision
 
 EPOCHS = 1000
+STEPS_PER_EPOCH = 100
 BATCH_SIZE = 10
 
 file_listing = pd.read_csv('data.csv')
@@ -41,28 +42,28 @@ def _img_map(input_filename, output_filename):
     output_image = tf.image.decode_bmp(output_image, channels=3)
     output_image = tf.image.resize_images(output_image, (224, 224))
     output_image = tf.cast(output_image, tf.float32)
-    output_image = output_image[:,:,1:2]
+    output_image = output_image[:,:,0:1]
 
     return input_image, output_image
 
 dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train))
 dataset = dataset.map(_img_map)
 dataset = dataset.batch(BATCH_SIZE)
-iterator = dataset.make_one_shot_iterator()
+iterator = dataset.repeat().make_one_shot_iterator()
 images, labels = iterator.get_next()
-
 
 with tf.Session() as sess:
     tf.keras.backend.set_session(sess)
     hairnet = model.create_model()
 
-    early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=25)
+    early_stop = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=50)
+    cp_callback = tf.keras.callbacks.ModelCheckpoint('training/cp-{epoch:04d}.ckpt', save_weights_only=True, verbose=1, period=10)
     hairnet.fit(
         tf.image.resize_images(images, (224, 224)), labels,
         epochs=EPOCHS, 
         #validation_split=0.2,
-        steps_per_epoch=1000,
-        callbacks=[early_stop])
+        steps_per_epoch=100,
+        callbacks=[early_stop, cp_callback])
     
     try:
         os.makedirs('./saved_models')
