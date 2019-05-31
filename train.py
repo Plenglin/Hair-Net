@@ -9,6 +9,8 @@ from PIL import Image
 import model
 import torchvision
 
+
+LOG_DIR = './logs'
 EPOCHS = 1000
 STEPS_PER_EPOCH = 100
 BATCH_SIZE = 10
@@ -56,14 +58,30 @@ with tf.Session() as sess:
     tf.keras.backend.set_session(sess)
     hairnet = model.create_model()
 
-    early_stop = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=50)
-    cp_callback = tf.keras.callbacks.ModelCheckpoint('training/cp-{epoch:04d}.ckpt', save_weights_only=True, verbose=1, period=10)
+    early_stop = tf.keras.callbacks.EarlyStopping(
+        monitor='loss', 
+        patience=50
+    )
+    cp_callback = tf.keras.callbacks.ModelCheckpoint(
+        'training/cp-{epoch:04d}.ckpt', 
+        save_weights_only=True, 
+        verbose=1, 
+        period=10
+    )
+    tboard_callback = tf.keras.callbacks.TensorBoard(
+        log_dir='./logs',
+        batch_size=32, 
+        write_graph=True,
+        update_freq='epoch'
+    )
+
     hairnet.fit(
-        tf.image.resize_images(images, (224, 224)), labels,
+        tf.image.resize_images(images, (224, 224)), 
+        labels,
         epochs=EPOCHS, 
         #validation_split=0.2,
         steps_per_epoch=100,
-        callbacks=[early_stop, cp_callback])
+        callbacks=[early_stop, cp_callback, tboard_callback])
     
     try:
         os.makedirs('./saved_models')
