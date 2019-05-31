@@ -3,11 +3,13 @@ import os
 import re
 
 from PIL import Image
-import pandas as pd
 import os
+import random
+
+
+TEST_PCT = 0.1
 
 images = []
-
 
 def add_image(path_in, path_out):
     images.append((path_in, path_out))
@@ -30,8 +32,21 @@ for img in os.listdir('data/lfw/parts_lfw_funneled_gt_images'):
         f'data/lfw/lfw_funneled/{name}/{name}_{i}.jpg',
         bitmap_path)
 
-with open('data.csv', 'w', newline='') as file:
+
+random.shuffle(images)
+split_index = int(len(images) * TEST_PCT) 
+test = images[:split_index]
+train = images[split_index:]
+
+with open('train.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow('input output'.split())
-    for row in images:
+    for row in train:
         writer.writerow(row)
+
+with open('test.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow('input output'.split())
+    for row in test:
+        writer.writerow(row)
+
