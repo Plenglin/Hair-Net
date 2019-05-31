@@ -11,7 +11,7 @@ def _img_map(input_filename, output_filename):
     output_image = tf.image.decode_bmp(output_image, channels=3)
     output_image = tf.image.resize_images(output_image, (224, 224))
     output_image = tf.cast(output_image, tf.float32)
-    output_image = output_image[:,:,0:1]
+    output_image = output_image[:,:,0:2]
 
     return input_image, output_image
 
