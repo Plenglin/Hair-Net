@@ -54,7 +54,6 @@ def create_model():
 
     # 28
     unpool_4 = keras.layers.UpSampling2D(size=(2, 2))(deconv_5)
-    print(unpool_4.shape, pool_4.shape)
     fuse_4 = keras.layers.Add()([unpool_4, pool_4])
     deconv_4 = keras.layers.Conv2DTranspose(16, (2, 2), (1, 1), padding='same', activation=tf.nn.relu)(fuse_4)
     deconv_4 = keras.layers.Conv2DTranspose(16, (2, 2), (1, 1), padding='same', activation=tf.nn.relu)(deconv_4)
