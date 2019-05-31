@@ -38,47 +38,48 @@ def create_model():
 
     # 7
     pool_6 = keras.layers.MaxPool2D(pool_size=(2, 2), name='pool_6')(conv_5)
-    fconv_1 = keras.layers.Conv2D(512, (7, 7), padding='same', activation=tf.nn.relu, name='fc_1')(pool_6)
+    fconv_1 = keras.layers.Conv2D(512, (5, 5), padding='same', activation=tf.nn.relu, name='fc_1')(pool_6)
     drop_1 = keras.layers.Dropout(rate=0.5)(fconv_1)
-    fconv_2 = keras.layers.Conv2D(256, (1, 1), padding='same', activation=tf.nn.relu, name='fc_2')(drop_1)
+    fconv_2 = keras.layers.Conv2D(512, (1, 1), padding='same', activation=tf.nn.relu, name='fc_2')(drop_1)
     drop_2 = keras.layers.Dropout(rate=0.5)(fconv_2)
+
+    score_6 = keras.layers.Conv2D(256, (3, 3), padding='same', activation=tf.nn.relu, name='score_6')(pool_6)
+    deconv_6 = keras.layers.Conv2DTranspose(256, (1, 1), padding='same', activation=tf.nn.relu, name='deconv_6')(drop_2)
+    fuse_6 = keras.layers.Add()([deconv_6, score_6])
 
     # 14
     score_5 = keras.layers.Conv2D(256, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='score_5')(pool_5)
-    unpool_5 = keras.layers.UpSampling2D(size=(2, 2), name='unpool_5')(drop_2)
+    unpool_5 = keras.layers.UpSampling2D(size=(2, 2), name='unpool_5')(fuse_6)
     fuse_5 = keras.layers.Add()([unpool_5, score_5])
-    deconv_5 = keras.layers.Conv2DTranspose(32, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_5a')(fuse_5)
-    deconv_5 = keras.layers.Conv2DTranspose(32, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_5b')(deconv_5)
-    deconv_5 = keras.layers.Conv2DTranspose(32, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_5c')(deconv_5)
+    deconv_5 = keras.layers.Conv2DTranspose(32, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_5a')(fuse_5)
 
     # 28
     score_4 = keras.layers.Conv2D(32, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='score_4')(pool_4)
     unpool_4 = keras.layers.UpSampling2D(size=(2, 2), name='unpool_4')(deconv_5)
     fuse_4 = keras.layers.Add()([unpool_4, score_4])
-    deconv_4 = keras.layers.Conv2DTranspose(16, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_4a')(fuse_4)
-    deconv_4 = keras.layers.Conv2DTranspose(16, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_4b')(deconv_4)
-    deconv_4 = keras.layers.Conv2DTranspose(16, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_4c')(deconv_4)
+    deconv_4 = keras.layers.Conv2DTranspose(16, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_4a')(fuse_4)
 
     # 56
     score_3 = keras.layers.Conv2D(16, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='score_3')(pool_3)
     unpool_3 = keras.layers.UpSampling2D(size=(2, 2), name='unpool_3')(deconv_4)
     fuse_3 = keras.layers.Add()([unpool_3, score_3])
-    deconv_3 = keras.layers.Conv2DTranspose(8, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_3a')(fuse_3)
-    deconv_3 = keras.layers.Conv2DTranspose(8, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_3b')(deconv_3)
+    deconv_3 = keras.layers.Conv2DTranspose(8, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_3a')(fuse_3)
+    deconv_3 = keras.layers.Conv2DTranspose(8, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_3b')(deconv_3)
 
     # 112
     score_2 = keras.layers.Conv2D(8, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='score_2')(pool_2)
     unpool_2 = keras.layers.UpSampling2D(size=(2, 2), name='unpool_2')(deconv_3)
     fuse_2 = keras.layers.Add()([unpool_2, score_2])
-    deconv_2 = keras.layers.Conv2DTranspose(4, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_2a')(fuse_2)
-    deconv_2 = keras.layers.Conv2DTranspose(4, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_2b')(deconv_2)
+    deconv_2 = keras.layers.Conv2DTranspose(8, (5, 5), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_2a')(fuse_2)
+    deconv_2 = keras.layers.Conv2DTranspose(8, (5, 5), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_2c')(deconv_2)
 
     # 224
-    score_1 = keras.layers.Conv2D(4, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='score_1')(inputs)
+    score_1 = keras.layers.Conv2D(8, (3, 3), (1, 1), padding='same', activation=tf.nn.relu, name='score_1')(inputs)
     unpool_1 = keras.layers.UpSampling2D(size=(2, 2), name='unpool_1')(deconv_2)
     fuse_1 = keras.layers.Add()([unpool_1, score_1])
-    deconv_1 = keras.layers.Conv2DTranspose(4, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='deconv_1a')(fuse_1)
-    deconv_1 = keras.layers.Conv2DTranspose(OUTPUT_CHANNELS, (2, 2), (1, 1), padding='same', activation=tf.nn.relu, name='output')(deconv_1)
+    deconv_1 = keras.layers.Conv2DTranspose(4, (5, 5), padding='same', activation=tf.nn.relu, name='deconv_1a')(fuse_1)
+    deconv_1 = keras.layers.Conv2DTranspose(4, (5, 5), padding='same', activation=tf.nn.relu, name='deconv_1b')(deconv_1)
+    deconv_1 = keras.layers.Conv2DTranspose(OUTPUT_CHANNELS, (5, 5), padding='same', activation=tf.nn.relu, name='output')(deconv_1)
 
     model = keras.Model(inputs=inputs, outputs=deconv_1)
     model.compile(
