@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from PIL import Image
+from tensorboard.plugins.beholder import Beholder
 
 import model
 import torchvision
@@ -54,10 +55,18 @@ dataset = dataset.batch(BATCH_SIZE)
 iterator = dataset.repeat().make_one_shot_iterator()
 images, labels = iterator.get_next()
 
+
 with tf.Session() as sess:
     tf.keras.backend.set_session(sess)
     hairnet = model.create_model()
+    beholder = Beholder(logdir=LOG_DIR)
 
+    def beholder_on_epoch_begin(x, y):
+        beholder.update(
+            session=sess,
+            frame=hairnet.get_layer('output').output
+        )
+    beholder_callback = tf.keras.callbacks.LambdaCallback(on_epoch_begin=beholder_on_epoch_begin)
     early_stop = tf.keras.callbacks.EarlyStopping(
         monitor='loss', 
         patience=50
@@ -69,7 +78,7 @@ with tf.Session() as sess:
         period=10
     )
     tboard_callback = tf.keras.callbacks.TensorBoard(
-        log_dir='./logs',
+        log_dir=LOG_DIR,
         batch_size=32, 
         write_graph=True,
         update_freq='epoch'
