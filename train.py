@@ -15,24 +15,27 @@ BATCH_SIZE = 10
 file_listing = pd.read_csv('data.csv')
 X_train, X_test, y_train, y_test = train_test_split(file_listing['input'], file_listing['output'], shuffle=True)
 
-output_transformer = torchvision.transforms.Compose([
-    torchvision.transforms.Resize((224, 224)),
-    torchvision.transforms.ToTensor()
-])
+output_transformer_resize = torchvision.transforms.Resize((224, 224))
+output_transformer_tensor = torchvision.transforms.ToTensor()
 
 def _gen():
     for input_filename, output_filename in zip(X_train, y_train):
         input_str = tf.read_file(input_filename)
         input_decoded = tf.image.decode_jpeg(input_str, channels=3)
-        input_raw = tf.cast(input_decoded, tf.float32)
-        input_resized = tf.image.resize_images(input_raw, (224, 224))
+        input_resized = tf.image.resize_images(input_decoded, (224, 224))
+        input_raw = tf.cast(input_resized, tf.float32)
 
         output_raw = Image.open(output_filename)
-        print("asdf")
+        output_scaled = output_transformer_resize(output_raw)
+        output_hair, output_skin, _ = output_scaled.split()
         
-        yield input_resized, output_transformer(output_raw)
+        yield input_resized, (output_transformer_tensor(output_hair), output_transformer_tensor(output_skin))
 
-dataset = tf.data.Dataset.from_generator(_gen, (tf.float32, tf.float32), ((224, 224, 3), (224, 224, 2)))
+dataset = tf.data.Dataset.from_generator(
+    _gen, 
+    (tf.float32, tf.float32),
+    ((224, 224, 3), (224, 224, 2))
+)
 dataset = dataset.batch(BATCH_SIZE)
 iterator = dataset.make_one_shot_iterator()
 images, labels = iterator.get_next()
