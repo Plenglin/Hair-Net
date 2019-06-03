@@ -1,4 +1,5 @@
 {
     "python.formatting.provider": "black",
-    "python.pythonPath": "C:\\Anaconda3\\envs\\hairnet\\python.exe"
+    "python.pythonPath": "C:\\Anaconda3\\envs\\hairnet\\python.exe",
+    "python.linting.enabled": true
 }

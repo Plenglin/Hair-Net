@@ -1,7 +1,7 @@
 # To not clog up the git repository
 data/
-train.csv
-test.csv
+*.csv
+*.txt
 saved_models/
 *.tflite
 training/

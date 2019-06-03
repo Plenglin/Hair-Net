@@ -17,8 +17,10 @@ STEPS_PER_EPOCH = 100
 BATCH_SIZE = 10
 
 file_listing = pd.read_csv("train.csv")
+with open('train_faceless.txt', 'r') as f:
+    facelesses = [l[:-1] for l in f.readlines()]
 
-dataset = util.create_dataset_from_file_listing(file_listing)
+dataset = util.create_dataset_from_file_listing(file_listing, facelesses)
 iterator = dataset.batch(BATCH_SIZE).repeat().make_one_shot_iterator()
 images, labels = iterator.get_next()
 
@@ -37,10 +39,9 @@ with tf.Session() as sess:
     )
 
     hairnet.fit(
-        tf.image.resize_images(images, (224, 224)),
+        images,
         labels,
         epochs=EPOCHS,
-        # validation_split=0.2,
         steps_per_epoch=100,
         callbacks=[early_stop, cp_callback, tboard_callback],
     )
