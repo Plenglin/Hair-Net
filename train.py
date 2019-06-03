@@ -31,8 +31,8 @@ images, labels = iterator.get_next()
 
 with tf.Session() as sess:
     tf.keras.backend.set_session(sess)
-    #hairnet = model.create_model()
-    hairnet = tf.contrib.saved_model.load_keras_model('./saved_models/1559537910')
+    hairnet = model.create_model()
+    #hairnet = tf.contrib.saved_model.load_keras_model('./saved_models/1559537910')
 
     hairnet.compile(
         optimizer=tf.train.AdamOptimizer(0.001),

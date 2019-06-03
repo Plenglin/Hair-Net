@@ -10,8 +10,10 @@ import util
 
 
 
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
 graph = tf.Graph()
-with tf.Session(graph=graph) as sess:
+with tf.Session(graph=graph, config=config) as sess:
     tf.keras.backend.set_session(sess)
     hairnet_def = tf.contrib.saved_model.load_keras_model("./saved_models/1559537910")
 
@@ -34,6 +36,6 @@ with tf.Session(graph=graph) as sess:
         output_face = result[0, :, :, 0]
         output_hair = result[0, :, :, 1]
     
-        frame[output_hair > 100] = (255, 0, 0)
-        frame[output_face > 100] = (0, 255, 0)
+        frame[output_hair > 50] = (255, 0, 0)
+        frame[output_face > 50] = (0, 255, 0)
         cv2.imshow('img', frame)
