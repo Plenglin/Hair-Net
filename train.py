@@ -19,7 +19,8 @@ file_listing = pd.read_csv("train.csv")
 with open('train_faceless.txt', 'r') as f:
     facelesses = [l[:-1] for l in f.readlines()]
 
-dataset = util.create_dataset_from_file_listing(file_listing, facelesses)
+gen = lambda: util.create_gen_from_file_listing(file_listing, facelesses)
+dataset = tf.data.Dataset.from_generator(gen, (tf.float32, tf.float32), ((224, 224, 3), (224, 224, 2)))
 iterator = (dataset
     .prefetch(BATCH_SIZE * 4)
     .batch(BATCH_SIZE)
