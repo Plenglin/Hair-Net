@@ -13,7 +13,7 @@ import util
 graph = tf.Graph()
 with tf.Session(graph=graph) as sess:
     tf.keras.backend.set_session(sess)
-    hairnet_def = tf.contrib.saved_model.load_keras_model("./saved_models/1559294377")
+    hairnet_def = tf.contrib.saved_model.load_keras_model("./saved_models/1559537910")
 
     input_layer = graph.get_tensor_by_name("input:0")
     output_layer = graph.get_tensor_by_name("output/Relu:0")
@@ -29,11 +29,11 @@ with tf.Session(graph=graph) as sess:
         frame = cv2.resize(frame, (224, 224))
 
         start = time.time()
-        result = sess.run(output_layer, feed_dict={"input:0": [frame[:, :, ::-1]]})
+        result = sess.run(output_layer, feed_dict={"input:0": [frame]})
         print(f"FPS: {1 / (time.time() - start)}")
-        output_hair = result[0, :, :, 0]
-        output_face = result[0, :, :, 1]
+        output_face = result[0, :, :, 0]
+        output_hair = result[0, :, :, 1]
     
-        frame[output_hair > 50] = (255, 0, 0)
-        frame[output_face > 50] = (0, 255, 0)
+        frame[output_hair > 100] = (255, 0, 0)
+        frame[output_face > 100] = (0, 255, 0)
         cv2.imshow('img', frame)

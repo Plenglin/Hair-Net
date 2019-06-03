@@ -143,11 +143,6 @@ def create_model():
     )(deconv_1)
 
     model = keras.Model(inputs=inputs, outputs=deconv_1)
-    model.compile(
-        optimizer=tf.train.AdamOptimizer(0.001),
-        loss="mean_squared_error",
-        metrics=["mean_absolute_error", "mean_squared_error"],
-    )
 
     return model
 

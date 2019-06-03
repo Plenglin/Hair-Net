@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from PIL import Image
-from tensorboard.plugins.beholder import Beholder
 
 import model
 import util
@@ -21,14 +20,24 @@ with open('train_faceless.txt', 'r') as f:
     facelesses = [l[:-1] for l in f.readlines()]
 
 dataset = util.create_dataset_from_file_listing(file_listing, facelesses)
-iterator = dataset.batch(BATCH_SIZE).repeat().make_one_shot_iterator()
+iterator = (dataset
+    .prefetch(BATCH_SIZE * 4)
+    .batch(BATCH_SIZE)
+    .repeat()
+    .make_one_shot_iterator())
 images, labels = iterator.get_next()
 
 
 with tf.Session() as sess:
     tf.keras.backend.set_session(sess)
-    hairnet = model.create_model()
-    beholder = Beholder(logdir=LOG_DIR)
+    #hairnet = model.create_model()
+    hairnet = tf.contrib.saved_model.load_keras_model('./saved_models/1559537910')
+
+    hairnet.compile(
+        optimizer=tf.train.AdamOptimizer(0.001),
+        loss="mean_squared_error",
+        metrics=["mean_absolute_error", "mean_squared_error"],   
+    )
 
     early_stop = tf.keras.callbacks.EarlyStopping(monitor="loss", patience=50)
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
