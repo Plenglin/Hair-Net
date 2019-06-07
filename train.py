@@ -8,9 +8,10 @@ from PIL import Image
 
 import model
 import util
+import time
 
 
-LOG_DIR = "./logs"
+LOG_DIR = "./logs/" + str(int(time.time()))
 EPOCHS = 1000
 STEPS_PER_EPOCH = 100
 BATCH_SIZE = 10
@@ -22,8 +23,8 @@ with open('train_faceless.txt', 'r') as f:
 gen = lambda: util.create_gen_from_file_listing(file_listing, facelesses)
 dataset = tf.data.Dataset.from_generator(gen, (tf.float32, tf.float32), ((224, 224, 3), (224, 224, 2)))
 iterator = (dataset
-    .prefetch(BATCH_SIZE * 4)
     .batch(BATCH_SIZE)
+    .prefetch(8)
     .repeat()
     .make_one_shot_iterator())
 images, labels = iterator.get_next()

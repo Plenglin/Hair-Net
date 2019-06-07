@@ -41,45 +41,54 @@ def create_gen_from_file_listing(file_listing, faceless):
             yield img, BLANK
         else:
             select = file_listing.iloc[random.randrange(0, len(file_listing))]
-            in_img = cv2.imread(select["input"])
-            in_img = cv2.resize(in_img, (224, 224))
+            in_file = select["input"]
+            in_img = cv2.imread(in_file, flags=cv2.IMREAD_COLOR)
+            #in_img = cv2.resize(in_img, (224, 224))
             out_img = cv2.imread(select["output"])
+            #out_img = cv2.resize(out_img, (224, 224))
 
             # Random orientations
-            rotation = random.choice([None, None, None, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_90_COUNTERCLOCKWISE])
-            if rotation is not None:
-                in_img = cv2.rotate(in_img, rotation)
-                out_img = cv2.rotate(out_img, rotation)
+            #rotation = random.choice([None, None, None, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_90_COUNTERCLOCKWISE])
+            #if rotation is not None:
+            #    in_img = cv2.rotate(in_img, rotation)
+            #    out_img = cv2.rotate(out_img, rotation)
             
             # Random occlusions
             if random.random() < OCCLUDE_RATE:
-                points = [np.int0(cv2.boxPoints(((random.randrange(0, 224), random.randrange(0, 224)), (random.randrange(0, 224), random.randrange(0, 224)), random.random() * math.pi)))]
+                points = [np.int0(cv2.boxPoints(((random.randrange(0, 224), random.randrange(0, 224)), (random.randrange(0, 100), random.randrange(0, 100)), random.random() * math.pi)))]
                 color = random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)
                 cv2.drawContours(in_img, points, 0, color, -1)
                 cv2.drawContours(out_img, points, 0, (0, 0, 0), -1)
 
-            # Random scalings
+            # Random scaling and translation
             scale = random.random() / 2 + 0.75
-            in_img = cv2.resize(in_img, None, fx=scale, fy=scale)
-            out_img = cv2.resize(out_img, None, fx=scale, fy=scale)
-            
-            # Rescale again to potentially destroy the quality
-            scale = random.random() / 2 + 0.75
-            in_img = cv2.resize(in_img, None, fx=scale, fy=scale)
-            out_img = cv2.resize(out_img, None, fx=scale, fy=scale)
+            tx = (224 - scale * 250) / 2 + (random.random() - 0.5) * 224 / scale
+            ty = (224 - scale * 250) / 2 + (random.random() - 0.5) * 224 / scale
+            M = np.array([[scale, 0, tx], [0, scale, ty]], dtype=np.float)
+            in_img = cv2.warpAffine(in_img, M, (224, 224))
+            out_img = cv2.warpAffine(out_img, M, (224, 224))
 
-            w, h, _ = in_img.shape
-            if w < 224:
-                # Make a border
-                border = (224 - w) // 2
-                in_img = cv2.copyMakeBorder(in_img, border, border, border, border, cv2.BORDER_WRAP)
-                out_img = cv2.copyMakeBorder(out_img, border, border, border, border, cv2.BORDER_WRAP)
-            else:
-                # Crop to center
-                size = 224
-                x = random.randint(0, w - size)
-                y = random.randint(0, h - size)
-                in_img = in_img[x:x+size, y:y+size]
-                out_img = out_img[x:x+size, y:y+size]
+            yield in_img, out_img[:,:,1:3]
 
-            yield cv2.resize(in_img, (224, 224)), cv2.resize(out_img, (224, 224))[:,:,1:3]
+
+if __name__ == "__main__":
+    import util
+    import cv2
+    import pandas as pd
+
+
+    file_listing = pd.read_csv("train.csv")
+    with open('train_faceless.txt', 'r') as f:
+        facelesses = [l[:-1] for l in f.readlines()]
+
+    gen = util.create_gen_from_file_listing(file_listing, facelesses)
+
+    for i, l in gen:
+        a = l[:, :, 0]
+        b = l[:, :, 1]
+
+        cv2.imshow('i', i)
+        cv2.imshow('a', a)
+        cv2.imshow('b', b)
+        cv2.waitKey()
+
