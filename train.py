@@ -8,10 +8,10 @@ from PIL import Image
 
 import model
 import util
-import time
+import datetime
 
 
-LOG_DIR = "./logs/" + str(int(time.time()))
+LOG_DIR = "./logs/" + str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
 EPOCHS = 1000
 STEPS_PER_EPOCH = 100
 BATCH_SIZE = 10
@@ -33,7 +33,7 @@ images, labels = iterator.get_next()
 with tf.Session() as sess:
     tf.keras.backend.set_session(sess)
     hairnet = model.create_model()
-    #hairnet = tf.contrib.saved_model.load_keras_model('./saved_models/1559537910')
+    #hairnet = tf.contrib.saved_model.load_keras_model('./saved_models/1559892854')
 
     hairnet.compile(
         optimizer=tf.train.AdamOptimizer(0.001),
@@ -49,13 +49,16 @@ with tf.Session() as sess:
         log_dir=LOG_DIR, batch_size=32, write_graph=True, update_freq="epoch"
     )
 
-    hairnet.fit(
-        images,
-        labels,
-        epochs=EPOCHS,
-        steps_per_epoch=100,
-        callbacks=[early_stop, cp_callback, tboard_callback],
-    )
+    try:
+        hairnet.fit(
+            images,
+            labels,
+            epochs=EPOCHS,
+            steps_per_epoch=100,
+            callbacks=[early_stop, cp_callback, tboard_callback],
+        )
+    except KeyboardInterrupt:
+        print('KeyboardInterrupt. stopping')
 
     try:
         os.makedirs("./saved_models")

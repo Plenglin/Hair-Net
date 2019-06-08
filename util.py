@@ -6,8 +6,8 @@ import numpy as np
 import math
 
 
-FACELESS_RATE = 0.3
-OCCLUDE_RATE = 0.6
+FACELESS_RATE = 0.4
+OCCLUDE_RATE = 0.3
 BLANK = np.zeros((224, 224, 2), dtype=np.float)
 
 def _img_map(input_filename, output_filename):
@@ -43,9 +43,8 @@ def create_gen_from_file_listing(file_listing, faceless):
             select = file_listing.iloc[random.randrange(0, len(file_listing))]
             in_file = select["input"]
             in_img = cv2.imread(in_file, flags=cv2.IMREAD_COLOR)
-            #in_img = cv2.resize(in_img, (224, 224))
             out_img = cv2.imread(select["output"])
-            #out_img = cv2.resize(out_img, (224, 224))
+            yield cv2.resize(in_img, (224, 224)), cv2.resize(out_img, (224, 224))[:,:,1:3]
 
             # Random orientations
             #rotation = random.choice([None, None, None, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE, cv2.ROTATE_90_COUNTERCLOCKWISE])

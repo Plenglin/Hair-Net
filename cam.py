@@ -15,10 +15,10 @@ config.gpu_options.allow_growth = True
 graph = tf.Graph()
 with tf.Session(graph=graph, config=config) as sess:
     tf.keras.backend.set_session(sess)
-    hairnet_def = tf.contrib.saved_model.load_keras_model("./saved_models/1559537910")
+    hairnet_def = tf.contrib.saved_model.load_keras_model("./saved_models/1559954939")
 
     input_layer = graph.get_tensor_by_name("input:0")
-    output_layer = graph.get_tensor_by_name("output/Relu:0")
+    output_layer = graph.get_tensor_by_name("deconv_1/Relu:0")
 
     cam = cv2.VideoCapture(0)
     while cv2.waitKey(1) & 0xFF != ord('q'):
