@@ -11,7 +11,7 @@ import util
 import datetime
 
 
-LOG_DIR = "./logs/" + str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+LOG_DIR = "./logs/train_" + str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
 EPOCHS = 1000
 STEPS_PER_EPOCH = 100
 BATCH_SIZE = 10
@@ -21,7 +21,7 @@ with open('train_faceless.txt', 'r') as f:
     facelesses = [l[:-1] for l in f.readlines()]
 
 gen = lambda: util.create_gen_from_file_listing(file_listing, facelesses)
-dataset = tf.data.Dataset.from_generator(gen, (tf.float32, tf.float32), ((224, 224, 3), (224, 224, 2)))
+dataset = tf.data.Dataset.from_generator(gen, (tf.float32, tf.float32), ((224, 224, 3), (224, 224, 3)))
 iterator = (dataset
     .batch(BATCH_SIZE)
     .prefetch(8)
@@ -33,12 +33,16 @@ images, labels = iterator.get_next()
 with tf.Session() as sess:
     tf.keras.backend.set_session(sess)
     hairnet = model.create_model()
-    #hairnet = tf.contrib.saved_model.load_keras_model('./saved_models/1559892854')
+    #hairnet = tf.contrib.saved_model.load_keras_model('./saved_models/1559969780')
+    run_options = tf.RunOptions()
+    run_metadata = tf.RunMetadata()
 
     hairnet.compile(
         optimizer=tf.train.AdamOptimizer(0.001),
         loss="mean_squared_error",
-        metrics=["mean_absolute_error", "mean_squared_error"],   
+        metrics=["accuracy", "categorical_crossentropy", "mean_squared_error"],
+        options=run_options, 
+        run_metadata=run_metadata
     )
 
     early_stop = tf.keras.callbacks.EarlyStopping(monitor="loss", patience=50)
