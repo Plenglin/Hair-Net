@@ -23,6 +23,7 @@ for img in os.listdir("data/lfw/parts_lfw_funneled_gt_images_bmp"):
     name = match.group(1)
     print(f"processing {img}")
 
+    # Uncomment to create BMPs
     #current_path = f"data/lfw/parts_lfw_funneled_gt_images/{img}"
     #bitmap_path = current_path.replace("ppm", "bmp")
     #image = Image.open(current_path)
