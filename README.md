@@ -7,9 +7,11 @@ This is a neural network made for separating hair from face, with the end goal t
 
 That end goal was merely a single part of a master plan to make live hair-simulation software that allows people to try on different hairstyles with the press of a button. That unfortunately didn't happen because it turns out [face pose detection is kinda hard](https://github.com/Plenglin/Head-Pose-Net) and 3D modeling hair is also kinda hard and mobile phones might not have the computing capacity to do this entire pipeline.
 
-The dataset used to train it was [LFW](http://vis-www.cs.umass.edu/lfw/). It should be placed in a directory called `data`. Additionally, there should be images without any faces in them in a subdirectory `data/faceless`.
+The dataset used to train it was [LFW](http://vis-www.cs.umass.edu/lfw/). It should be placed in a directory called `data`. 
 
-The structure should look like this:
+Additionally, there should be images without any faces in them in a subdirectory `data/faceless`. I got them from vacation photos and pictures of my wall. 
+
+The final directory structure should look like this:
 ```
 /
   data/
